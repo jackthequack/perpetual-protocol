@@ -1,8 +1,0 @@
-ignore:
-  - "src/mock/**/*"
-coverage:
-  status:
-    project:
-      default:
-        target: 70%
-    patch: off

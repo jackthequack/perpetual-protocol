@@ -34,3 +34,7 @@ flattened
 addAggregator_*.txt
 
 .venv
+build/
+interfaces/
+reports/
+.vscode/
