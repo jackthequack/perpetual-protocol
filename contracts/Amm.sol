@@ -12,7 +12,7 @@ import { MixedDecimal } from "./utils/MixedDecimal.sol";
 import { PerpFiOwnableUpgrade } from "./utils/PerpFiOwnableUpgrade.sol";
 import { IAmm } from "./interface/IAmm.sol";
 
-contract Amm is IAmm, PerpFiOwnableUpgrade, BlockContext {
+contract Amm is IAmm, BlockContext {
     using SafeMath for uint256;
     using Decimal for Decimal.decimal;
     using SignedDecimal for SignedDecimal.signedDecimal;

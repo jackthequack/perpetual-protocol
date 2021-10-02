@@ -38,3 +38,5 @@ build/
 interfaces/
 reports/
 .vscode/
+OpenZeppelin
+scripts

@@ -1,6 +1,9 @@
-#  Perpetual Protocol <img src="https://github.com/perpetual-protocol/perp-contract/blob/develop/docs/Perpetual.png" width="40">
+# Perpetual Protocol
 
-## Installing 
+## Bronwie Framework
+
+## Installing
+
 - [Install Brownie](https://eth-brownie.readthedocs.io/en/stable/install.html)
 
 ```
@@ -11,6 +14,14 @@ pip install -r requirements.txt
 ```
 
 ```
-# brownie clone peripheries 
+# brownie clone peripheries
 brownie pm clone OpenZeppelin/openzeppelin-contracts@3.4.0
+brownie pm install smartcontractkit/chainlink-brownie-contracts@0.2.2
+```
+
+## Getting Started
+
+```
+brownie compile
+brownie test
 ```
