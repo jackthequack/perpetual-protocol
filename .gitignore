@@ -32,3 +32,5 @@ coverage.json
 
 flattened
 addAggregator_*.txt
+
+.venv
