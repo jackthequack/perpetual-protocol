@@ -1,6 +1,7 @@
 dependencies:
   - OpenZeppelin/openzeppelin-contracts@3.4.0
   - smartcontractkit/chainlink-brownie-contracts@0.2.2
+  - opengsn/gsn@2.0.0
 
 autofetch_sources: true
 
@@ -8,6 +9,7 @@ compiler:
   solc:
     version: 0.6.9
     remappings:
+      - "@opengsn/gsn=opengsn/gsn@2.0.0"
       - "@chainlink=smartcontractkit/chainlink-brownie-contracts@0.2.2"
       - "@openzeppelin/contracts-ethereum-package=OpenZeppelin/openzeppelin-contracts@3.4.0"
 

@@ -1,6 +1,6 @@
 # Perpetual Protocol
 
-## Bronwie Framework
+## Brownie Framework
 
 ## Installing
 
@@ -17,6 +17,7 @@ pip install -r requirements.txt
 # brownie clone peripheries
 brownie pm clone OpenZeppelin/openzeppelin-contracts@3.4.0
 brownie pm install smartcontractkit/chainlink-brownie-contracts@0.2.2
+brownie pm install opengsn/gsn@2.0.0
 ```
 
 ## Getting Started
