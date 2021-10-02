@@ -4,7 +4,7 @@ pragma experimental ABIEncoderV2;
 
 import { BaseBridge, IAMB, IMultiTokenMediator, IERC20 } from "../BaseBridge.sol";
 import { BaseRelayRecipient } from "@opengsn/gsn/contracts/BaseRelayRecipient.sol";
-import { ContextUpgradeSafe } from "@openzeppelin/contracts-ethereum-package/contracts/GSN/Context.sol";
+import { Context } from "@openzeppelin/contracts-ethereum-package/contracts/GSN/Context.sol";
 import { Decimal } from "../../utils/Decimal.sol";
 
 // note BaseRelayRecipient must come after OwnerPausableUpgradeSafe (in BaseBridge) so its _msgSender() takes precedence
@@ -63,11 +63,11 @@ contract ClientBridge is BaseBridge, BaseRelayRecipient {
     //
     // INTERNAL VIEW FUNCTIONS
     //
-    function _msgSender() internal view override(BaseRelayRecipient, ContextUpgradeSafe) returns (address payable) {
+    function _msgSender() internal view override(BaseRelayRecipient, Context) returns (address payable) {
         return super._msgSender();
     }
 
-    function _msgData() internal view override(BaseRelayRecipient, ContextUpgradeSafe) returns (bytes memory ret) {
+    function _msgData() internal view override(BaseRelayRecipient, Context) returns (bytes memory ret) {
         return super._msgData();
     }
 }

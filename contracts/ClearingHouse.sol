@@ -9,21 +9,19 @@ import { Decimal } from "./utils/Decimal.sol";
 import { SignedDecimal } from "./utils/SignedDecimal.sol";
 import { MixedDecimal } from "./utils/MixedDecimal.sol";
 import { DecimalERC20 } from "./utils/DecimalERC20.sol";
-import { ContextUpgradeSafe } from "@openzeppelin/contracts-ethereum-package/contracts/GSN/Context.sol";
+import { Context } from "@openzeppelin/contracts-ethereum-package/contracts/GSN/Context.sol";
 // prettier-ignore
 // solhint-disable-next-line
-import { ReentrancyGuardUpgradeSafe } from "@openzeppelin/contracts-ethereum-package/contracts/utils/ReentrancyGuard.sol";
+import { ReentrancyGuard } from "@openzeppelin/contracts-ethereum-package/contracts/utils/ReentrancyGuard.sol";
 import { OwnerPausableUpgradeSafe } from "./OwnerPausable.sol";
 import { IAmm } from "./interface/IAmm.sol";
-import { IInsuranceFund } from "./interface/IInsuranceFund.sol";
-import { IMultiTokenRewardRecipient } from "./interface/IMultiTokenRewardRecipient.sol";
 
 // note BaseRelayRecipient must come after OwnerPausableUpgradeSafe so its _msgSender() takes precedence
 // (yes, the ordering is reversed comparing to Python)
 contract ClearingHouse is
     DecimalERC20,
     OwnerPausableUpgradeSafe,
-    ReentrancyGuardUpgradeSafe,
+    ReentrancyGuard,
     BlockContext,
     BaseRelayRecipient
 {
@@ -181,7 +179,7 @@ contract ClearingHouse is
 
     // contract dependencies
     IInsuranceFund public insuranceFund;
-    IMultiTokenRewardRecipient public feePool;
+    // IMultiTokenRewardRecipient public feePool;
 
     // designed for arbitragers who can hold unlimited positions. will be removed after guarded period
     address internal whitelist;
@@ -249,9 +247,9 @@ contract ClearingHouse is
      * @notice set the toll pool address
      * @dev only owner can call
      */
-    function setTollPool(address _feePool) external onlyOwner {
-        feePool = IMultiTokenRewardRecipient(_feePool);
-    }
+    // function setTollPool(address _feePool) external onlyOwner {
+    //     feePool = IMultiTokenRewardRecipient(_feePool);
+    // }
 
     /**
      * @notice add an address in the whitelist. People in the whitelist can hold unlimited positions.
@@ -1341,11 +1339,11 @@ contract ClearingHouse is
         position = ammMap[address(_amm)].positionMap[_trader];
     }
 
-    function _msgSender() internal view override(BaseRelayRecipient, ContextUpgradeSafe) returns (address payable) {
+    function _msgSender() internal view override(BaseRelayRecipient, Context) returns (address payable) {
         return super._msgSender();
     }
 
-    function _msgData() internal view override(BaseRelayRecipient, ContextUpgradeSafe) returns (bytes memory ret) {
+    function _msgData() internal view override(BaseRelayRecipient, Context) returns (bytes memory ret) {
         return super._msgData();
     }
 

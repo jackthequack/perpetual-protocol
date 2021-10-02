@@ -7,9 +7,8 @@ import { IAMB } from "./external/IAMB.sol";
 import { IBaseBridge } from "./IBaseBridge.sol";
 import { IMultiTokenMediator } from "./external/IMultiTokenMediator.sol";
 import { DecimalERC20, Decimal } from "../utils/DecimalERC20.sol";
-import { PerpFiOwnableUpgrade } from "../utils/PerpFiOwnableUpgrade.sol";
 
-abstract contract BaseBridge is PerpFiOwnableUpgrade, IBaseBridge, DecimalERC20 {
+abstract contract IBaseBridge, DecimalERC20 {
     using Decimal for Decimal.decimal;
 
     //

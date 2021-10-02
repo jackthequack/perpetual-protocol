@@ -4,7 +4,7 @@ pragma experimental ABIEncoderV2;
 
 import { AggregatorV3Interface } from "@chainlink/contracts/src/v0.6/interfaces/AggregatorV3Interface.sol";
 import { BlockContext } from "./utils/BlockContext.sol";
-import { PerpFiOwnableUpgrade } from "./utils/PerpFiOwnableUpgrade.sol";
+
 import { RootBridge } from "./bridge/ethereum/RootBridge.sol";
 import { Decimal, SafeMath } from "./utils/Decimal.sol";
 

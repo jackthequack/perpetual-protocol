@@ -5,10 +5,10 @@ pragma experimental ABIEncoderV2;
 import { AggregatorV3Interface } from "@chainlink/contracts/src/v0.6/interfaces/AggregatorV3Interface.sol";
 import { IPriceFeed } from "./interface/IPriceFeed.sol";
 import { BlockContext } from "./utils/BlockContext.sol";
-import { PerpFiOwnableUpgrade } from "./utils/PerpFiOwnableUpgrade.sol";
+
 import { Decimal, SafeMath } from "./utils/Decimal.sol";
 
-contract ChainlinkPriceFeed is IPriceFeed, PerpFiOwnableUpgrade, BlockContext {
+contract ChainlinkPriceFeed is IPriceFeed, BlockContext {
     using SafeMath for uint256;
 
     uint256 private constant TOKEN_DIGIT = 10**18;
