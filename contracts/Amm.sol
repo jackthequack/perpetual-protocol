@@ -49,7 +49,7 @@ contract Amm is IAmm, BlockContext {
     }
 
     modifier onlyCounterParty() {
-        require(counterParty == _msgSender(), "caller is not counterParty");
+        require(counterParty == msg.sender(), "caller is not counterParty");
         _;
     }
 
@@ -137,6 +137,13 @@ contract Amm is IAmm, BlockContext {
     bool public override open;
     uint256[50] private __gap;
 
+    address owner;
+
+    modifier onlyOwner {
+        require (msg.sender==owner);
+        _;
+    }
+
     //**********************************************************//
     //    The above state variables can not change the order    //
     //**********************************************************//
@@ -159,7 +166,7 @@ contract Amm is IAmm, BlockContext {
         uint256 _fluctuationLimitRatio,
         uint256 _tollRatio,
         uint256 _spreadRatio
-    ) public initializer {
+    ) public initialize {
         require(
             _quoteAssetReserve != 0 &&
                 _tradeLimitRatio != 0 &&
@@ -169,7 +176,8 @@ contract Amm is IAmm, BlockContext {
                 _quoteAsset != address(0),
             "invalid input"
         );
-        __Ownable_init();
+
+        owner = msg.sender;
 
         quoteAssetReserve = Decimal.decimal(_quoteAssetReserve);
         baseAssetReserve = Decimal.decimal(_baseAssetReserve);
@@ -326,7 +334,7 @@ contract Amm is IAmm, BlockContext {
      * The price calculation is in `globalShutdown`.
      */
     function shutdown() external override {
-        require(_msgSender() == owner() || _msgSender() == globalShutdown, "not owner nor globalShutdown");
+        require(msg.sender() == owner() || msg.sender() == globalShutdown, "not owner nor globalShutdown");
         implShutdown();
     }
 
