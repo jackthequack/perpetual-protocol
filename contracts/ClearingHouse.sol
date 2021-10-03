@@ -13,14 +13,14 @@ import { Context } from "@openzeppelin/contracts-ethereum-package/contracts/GSN/
 // prettier-ignore
 // solhint-disable-next-line
 import { ReentrancyGuard } from "@openzeppelin/contracts-ethereum-package/contracts/utils/ReentrancyGuard.sol";
-import { OwnerPausableUpgradeSafe } from "./OwnerPausable.sol";
 import { IAmm } from "./interface/IAmm.sol";
+import { IInsuranceFund } from "./interface/IInsuranceFund.sol";
+import { IMultiTokenRewardRecipient } from "./interface/IMultiTokenRewardRecipient.sol";
 
 // note BaseRelayRecipient must come after OwnerPausableUpgradeSafe so its _msgSender() takes precedence
 // (yes, the ordering is reversed comparing to Python)
 contract ClearingHouse is
     DecimalERC20,
-    OwnerPausableUpgradeSafe,
     ReentrancyGuard,
     BlockContext,
     BaseRelayRecipient
@@ -179,7 +179,7 @@ contract ClearingHouse is
 
     // contract dependencies
     IInsuranceFund public insuranceFund;
-    // IMultiTokenRewardRecipient public feePool;
+    IMultiTokenRewardRecipient public feePool;
 
     // designed for arbitragers who can hold unlimited positions. will be removed after guarded period
     address internal whitelist;
@@ -205,11 +205,9 @@ contract ClearingHouse is
         uint256 _liquidationFeeRatio,
         IInsuranceFund _insuranceFund,
         address _trustedForwarder
-    ) public initializer {
+    ) public  {
         require(address(_insuranceFund) != address(0), "Invalid IInsuranceFund");
 
-        __OwnerPausable_init();
-        __ReentrancyGuard_init();
 
         versionRecipient = "1.0.0"; // we are not using it atm
         initMarginRatio = Decimal.decimal(_initMarginRatio);
@@ -228,7 +226,7 @@ contract ClearingHouse is
      * @dev only owner can call
      * @param _liquidationFeeRatio new liquidation fee ratio in 18 digits
      */
-    function setLiquidationFeeRatio(Decimal.decimal memory _liquidationFeeRatio) external onlyOwner {
+    function setLiquidationFeeRatio(Decimal.decimal memory _liquidationFeeRatio) external {
         liquidationFeeRatio = _liquidationFeeRatio;
         emit LiquidationFeeRatioChanged(liquidationFeeRatio.toUint());
     }
@@ -238,7 +236,7 @@ contract ClearingHouse is
      * @dev only owner can call
      * @param _maintenanceMarginRatio new maintenance margin ratio in 18 digits
      */
-    function setMaintenanceMarginRatio(Decimal.decimal memory _maintenanceMarginRatio) external onlyOwner {
+    function setMaintenanceMarginRatio(Decimal.decimal memory _maintenanceMarginRatio) external {
         maintenanceMarginRatio = _maintenanceMarginRatio;
         emit MarginRatioChanged(maintenanceMarginRatio.toUint());
     }
@@ -247,16 +245,16 @@ contract ClearingHouse is
      * @notice set the toll pool address
      * @dev only owner can call
      */
-    // function setTollPool(address _feePool) external onlyOwner {
-    //     feePool = IMultiTokenRewardRecipient(_feePool);
-    // }
+    function setTollPool(address _feePool) external {
+        feePool = IMultiTokenRewardRecipient(_feePool);
+    }
 
     /**
      * @notice add an address in the whitelist. People in the whitelist can hold unlimited positions.
      * @dev only owner can call
      * @param _whitelist an address
      */
-    function setWhitelist(address _whitelist) external onlyOwner {
+    function setWhitelist(address _whitelist) external {
         whitelist = _whitelist;
     }
 
@@ -264,7 +262,7 @@ contract ClearingHouse is
      * @notice set the margin ratio after deleveraging
      * @dev only owner can call
      */
-    function setPartialLiquidationRatio(Decimal.decimal memory _ratio) external onlyOwner {
+    function setPartialLiquidationRatio(Decimal.decimal memory _ratio) external {
         require(_ratio.cmp(Decimal.one()) <= 0, "invalid partial liquidation ratio");
         partialLiquidationRatio = _ratio;
     }
@@ -274,7 +272,7 @@ contract ClearingHouse is
      * @param _amm IAmm address
      * @param _addedMargin added margin in 18 digits
      */
-    function addMargin(IAmm _amm, Decimal.decimal calldata _addedMargin) external whenNotPaused() nonReentrant() {
+    function addMargin(IAmm _amm, Decimal.decimal calldata _addedMargin) external {
         // check condition
         requireAmm(_amm, true);
         requireNonZeroInput(_addedMargin);
@@ -293,7 +291,7 @@ contract ClearingHouse is
      * @param _amm IAmm address
      * @param _removedMargin removed margin in 18 digits
      */
-    function removeMargin(IAmm _amm, Decimal.decimal calldata _removedMargin) external whenNotPaused() nonReentrant() {
+    function removeMargin(IAmm _amm, Decimal.decimal calldata _removedMargin) external {
         // check condition
         requireAmm(_amm, true);
         requireNonZeroInput(_removedMargin);
@@ -426,7 +424,7 @@ contract ClearingHouse is
         Decimal.decimal memory _quoteAssetAmount,
         Decimal.decimal memory _leverage,
         Decimal.decimal memory _baseAssetAmountLimit
-    ) public whenNotPaused() nonReentrant() {
+    ) public  {
         requireAmm(_amm, true);
         requireNonZeroInput(_quoteAssetAmount);
         requireNonZeroInput(_leverage);
@@ -528,8 +526,6 @@ contract ClearingHouse is
      */
     function closePosition(IAmm _amm, Decimal.decimal memory _quoteAssetAmountLimit)
         public
-        whenNotPaused()
-        nonReentrant()
     {
         // check conditions
         requireAmm(_amm, true);
@@ -1339,11 +1335,11 @@ contract ClearingHouse is
         position = ammMap[address(_amm)].positionMap[_trader];
     }
 
-    function _msgSender() internal view override(BaseRelayRecipient, Context) returns (address payable) {
+    function _msgSender() internal view override(BaseRelayRecipient) returns (address payable) {
         return super._msgSender();
     }
 
-    function _msgData() internal view override(BaseRelayRecipient, Context) returns (bytes memory ret) {
+    function _msgData() internal view override(BaseRelayRecipient) returns (bytes memory ret) {
         return super._msgData();
     }
 

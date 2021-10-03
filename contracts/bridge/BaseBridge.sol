@@ -8,7 +8,7 @@ import { IBaseBridge } from "./IBaseBridge.sol";
 import { IMultiTokenMediator } from "./external/IMultiTokenMediator.sol";
 import { DecimalERC20, Decimal } from "../utils/DecimalERC20.sol";
 
-abstract contract IBaseBridge, DecimalERC20 {
+abstract contract BaseBridge is IBaseBridge, DecimalERC20 {
     using Decimal for Decimal.decimal;
 
     //
@@ -40,19 +40,18 @@ abstract contract IBaseBridge, DecimalERC20 {
     //
     // PUBLIC
     //
-    function __BaseBridge_init(IAMB _ambBridge, IMultiTokenMediator _multiTokenMediator) internal initializer {
-        __Ownable_init();
+    function __BaseBridge_init(IAMB _ambBridge, IMultiTokenMediator _multiTokenMediator) internal {
         setAMBBridge(_ambBridge);
         setMultiTokenMediator(_multiTokenMediator);
     }
 
-    function setAMBBridge(IAMB _ambBridge) public onlyOwner {
+    function setAMBBridge(IAMB _ambBridge) public {
         require(address(_ambBridge) != address(0), "address is empty");
         ambBridge = _ambBridge;
         emit BridgeChanged(address(_ambBridge));
     }
 
-    function setMultiTokenMediator(IMultiTokenMediator _multiTokenMediator) public onlyOwner {
+    function setMultiTokenMediator(IMultiTokenMediator _multiTokenMediator) public {
         require(address(_multiTokenMediator) != address(0), "address is empty");
         multiTokenMediator = _multiTokenMediator;
         emit MultiTokenMediatorChanged(address(_multiTokenMediator));
@@ -77,7 +76,7 @@ abstract contract IBaseBridge, DecimalERC20 {
     ) internal virtual {
         require(_receiver != address(0), "receiver is empty");
         // transfer tokens from msg sender
-        _transferFrom(_token, _msgSender(), address(this), _amount);
+        _transferFrom(_token, msg.sender, address(this), _amount);
 
         // approve to multi token mediator and call 'relayTokens'
         approveToMediator(_token);

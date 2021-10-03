@@ -2,10 +2,6 @@
 pragma solidity 0.6.9;
 pragma experimental ABIEncoderV2;
 
-
-import {
-    ReentrancyGuard
-} from "@openzeppelin/contracts-ethereum-package/contracts/utils/ReentrancyGuard.sol";
 import { IERC20 } from "@openzeppelin/contracts-ethereum-package/contracts/token/ERC20/IERC20.sol";
 import { Decimal } from "./utils/Decimal.sol";
 import { IExchangeWrapper } from "./interface/IExchangeWrapper.sol";
@@ -16,7 +12,7 @@ import { IMinter } from "./interface/IMinter.sol";
 import { IAmm } from "./interface/IAmm.sol";
 import { IInflationMonitor } from "./interface/IInflationMonitor.sol";
 
-contract InsuranceFund is IInsuranceFund, BlockContext, ReentrancyGuard, DecimalERC20 {
+contract InsuranceFund is IInsuranceFund, BlockContext, DecimalERC20 {
     using Decimal for Decimal.decimal;
 
     //
@@ -59,96 +55,13 @@ contract InsuranceFund is IInsuranceFund, BlockContext, ReentrancyGuard, Decimal
     // FUNCTIONS
     //
 
-    function initialize() external initializer {
-        __Ownable_init();
-        __ReentrancyGuard_init();
-    }
-
-    /**
-     * @dev only owner can call
-     * @param _amm IAmm address
-     */
-    function addAmm(IAmm _amm) public onlyOwner {
-        require(!isExistedAmm(_amm), "amm already added");
-        ammMap[address(_amm)] = true;
-        amms.push(_amm);
-        emit AmmAdded(address(_amm));
-
-        // add token if it's new one
-        IERC20 token = _amm.quoteAsset();
-        if (!isQuoteTokenExisted(token)) {
-            quoteTokens.push(token);
-            quoteTokenMap[address(token)] = true;
-            emit TokenAdded(address(token));
-        }
-    }
-
-    /**
-     * @dev only owner can call. no need to call
-     * @param _amm IAmm address
-     */
-    function removeAmm(IAmm _amm) external onlyOwner {
-        require(isExistedAmm(_amm), "amm not existed");
-        ammMap[address(_amm)] = false;
-        uint256 ammLength = amms.length;
-        for (uint256 i = 0; i < ammLength; i++) {
-            if (amms[i] == _amm) {
-                amms[i] = amms[ammLength - 1];
-                amms.pop();
-                emit AmmRemoved(address(_amm));
-                break;
-            }
-        }
-    }
-
-    /**
-     * @notice shutdown all Amms when fatal error happens
-     * @dev only owner can call. Emit `ShutdownAllAmms` event
-     */
-    function shutdownAllAmm() external onlyOwner {
-        if (!inflationMonitor.isOverMintThreshold()) {
-            return;
-        }
-        for (uint256 i; i < amms.length; i++) {
-            amms[i].shutdown();
-        }
-        emit ShutdownAllAmms(block.number);
-    }
-
-    function removeToken(IERC20 _token) external onlyOwner {
-        require(isQuoteTokenExisted(_token), "token not existed");
-
-        quoteTokenMap[address(_token)] = false;
-        uint256 quoteTokensLength = getQuoteTokenLength();
-        for (uint256 i = 0; i < quoteTokensLength; i++) {
-            if (quoteTokens[i] == _token) {
-                if (i < quoteTokensLength - 1) {
-                    quoteTokens[i] = quoteTokens[quoteTokensLength - 1];
-                }
-                quoteTokens.pop();
-                break;
-            }
-        }
-
-        // exchange and transfer to the quoteToken with the most value. if no more quoteToken, buy protocol tokens
-        // TODO use curve or balancer fund token for pooling the fees will be less painful
-        if (balanceOf(_token).toUint() > 0) {
-            address outputToken = getTokenWithMaxValue();
-            if (outputToken == address(0)) {
-                outputToken = address(perpToken);
-            }
-            swapInput(_token, IERC20(outputToken), balanceOf(_token), Decimal.zero());
-        }
-
-        emit TokenRemoved(address(_token));
-    }
 
     /**
      * @notice withdraw token to caller
      * @param _amount the amount of quoteToken caller want to withdraw
      */
     function withdraw(IERC20 _quoteToken, Decimal.decimal calldata _amount) external override {
-        require(beneficiary == _msgSender(), "caller is not beneficiary");
+        require(beneficiary == msg.sender, "caller is not beneficiary");
         require(isQuoteTokenExisted(_quoteToken), "Asset is not supported");
 
         Decimal.decimal memory quoteBalance = balanceOf(_quoteToken);
@@ -159,30 +72,10 @@ contract InsuranceFund is IInsuranceFund, BlockContext, ReentrancyGuard, Decimal
         }
         require(quoteBalance.toUint() >= _amount.toUint(), "Fund not enough");
 
-        _transfer(_quoteToken, _msgSender(), _amount);
-        emit Withdrawn(_msgSender(), _amount.toUint());
+        _transfer(_quoteToken, msg.sender, _amount);
+        emit Withdrawn(msg.sender, _amount.toUint());
     }
 
-    //
-    // SETTER
-    //
-
-    function setExchange(IExchangeWrapper _exchange) external onlyOwner {
-        exchange = _exchange;
-    }
-
-    function setBeneficiary(address _beneficiary) external onlyOwner {
-        beneficiary = _beneficiary;
-    }
-
-    function setMinter(IMinter _minter) public onlyOwner {
-        minter = _minter;
-        perpToken = minter.getPerpToken();
-    }
-
-    function setInflationMonitor(IInflationMonitor _inflationMonitor) external onlyOwner {
-        inflationMonitor = _inflationMonitor;
-    }
 
     function getQuoteTokenLength() public view returns (uint256) {
         return quoteTokens.length;

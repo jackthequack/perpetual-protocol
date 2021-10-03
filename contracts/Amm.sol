@@ -9,7 +9,6 @@ import { IERC20 } from "@openzeppelin/contracts-ethereum-package/contracts/token
 import { Decimal } from "./utils/Decimal.sol";
 import { SignedDecimal } from "./utils/SignedDecimal.sol";
 import { MixedDecimal } from "./utils/MixedDecimal.sol";
-
 import { IAmm } from "./interface/IAmm.sol";
 
 contract Amm is IAmm, BlockContext {
@@ -40,22 +39,6 @@ contract Amm is IAmm, BlockContext {
     event Shutdown(uint256 settlementPrice);
     event PriceFeedUpdated(address priceFeed);
 
-    //
-    // MODIFIERS
-    //
-    modifier onlyOpen() {
-        require(open, "amm was closed");
-        _;
-    }
-
-    modifier onlyCounterParty() {
-        require(counterParty == _msgSender(), "caller is not counterParty");
-        _;
-    }
-
-    //
-    // enum and struct
-    //
     struct ReserveSnapshot {
         Decimal.decimal quoteAssetReserve;
         Decimal.decimal baseAssetReserve;
@@ -159,7 +142,7 @@ contract Amm is IAmm, BlockContext {
         uint256 _fluctuationLimitRatio,
         uint256 _tollRatio,
         uint256 _spreadRatio
-    ) public initializer {
+    ) public {
         require(
             _quoteAssetReserve != 0 &&
                 _tradeLimitRatio != 0 &&
@@ -169,7 +152,7 @@ contract Amm is IAmm, BlockContext {
                 _quoteAsset != address(0),
             "invalid input"
         );
-        __Ownable_init();
+        
 
         quoteAssetReserve = Decimal.decimal(_quoteAssetReserve);
         baseAssetReserve = Decimal.decimal(_baseAssetReserve);
@@ -210,7 +193,7 @@ contract Amm is IAmm, BlockContext {
         Decimal.decimal calldata _quoteAssetAmount,
         Decimal.decimal calldata _baseAssetAmountLimit,
         bool _canOverFluctuationLimit
-    ) external override onlyOpen onlyCounterParty returns (Decimal.decimal memory) {
+    ) external override returns (Decimal.decimal memory) {
         if (_quoteAssetAmount.toUint() == 0) {
             return Decimal.zero();
         }
@@ -250,7 +233,7 @@ contract Amm is IAmm, BlockContext {
         Dir _dirOfBase,
         Decimal.decimal calldata _baseAssetAmount,
         Decimal.decimal calldata _quoteAssetAmountLimit
-    ) external override onlyOpen onlyCounterParty returns (Decimal.decimal memory) {
+    ) external override   returns (Decimal.decimal memory) {
         return implSwapOutput(_dirOfBase, _baseAssetAmount, _quoteAssetAmountLimit);
     }
 
@@ -259,7 +242,7 @@ contract Amm is IAmm, BlockContext {
      * @dev only allow to update while reaching `nextFundingTime`
      * @return premium fraction of this period in 18 digits
      */
-    function settleFunding() external override onlyOpen onlyCounterParty returns (SignedDecimal.signedDecimal memory) {
+    function settleFunding() external override  returns (SignedDecimal.signedDecimal memory) {
         require(_blockTimestamp() >= nextFundingTime, "settle funding too early");
 
         // premium = twapMarketPrice - twapIndexPrice
@@ -325,17 +308,17 @@ contract Amm is IAmm, BlockContext {
      * @dev only `globalShutdown` or owner can call this function
      * The price calculation is in `globalShutdown`.
      */
-    function shutdown() external override {
-        require(_msgSender() == owner() || _msgSender() == globalShutdown, "not owner nor globalShutdown");
-        implShutdown();
-    }
+    // function shutdown() external override {
+    //     require(_msgSender() == owner() || _msgSender() == globalShutdown, "not owner nor globalShutdown");
+    //     implShutdown();
+    // }
 
     /**
      * @notice set counter party
      * @dev only owner can call this function
      * @param _counterParty address of counter party
      */
-    function setCounterParty(address _counterParty) external onlyOwner {
+    function setCounterParty(address _counterParty) external  {
         counterParty = _counterParty;
     }
 
@@ -344,7 +327,7 @@ contract Amm is IAmm, BlockContext {
      * @dev only owner can call this function
      * @param _globalShutdown address of `globalShutdown`
      */
-    function setGlobalShutdown(address _globalShutdown) external onlyOwner {
+    function setGlobalShutdown(address _globalShutdown) external  {
         globalShutdown = _globalShutdown;
     }
 
@@ -353,7 +336,7 @@ contract Amm is IAmm, BlockContext {
      * @dev only owner can call this function
      * @param _fluctuationLimitRatio fluctuation limit rate in 18 digits, 0 means skip the checking
      */
-    function setFluctuationLimitRatio(Decimal.decimal memory _fluctuationLimitRatio) public onlyOwner {
+    function setFluctuationLimitRatio(Decimal.decimal memory _fluctuationLimitRatio) public  {
         fluctuationLimitRatio = _fluctuationLimitRatio;
     }
 
@@ -362,7 +345,7 @@ contract Amm is IAmm, BlockContext {
      * @dev only owner can call this function
      * @param _interval time interval in seconds
      */
-    function setSpotPriceTwapInterval(uint256 _interval) external onlyOwner {
+    function setSpotPriceTwapInterval(uint256 _interval) external  {
         require(_interval != 0, "can not set interval to 0");
         spotPriceTwapInterval = _interval;
     }
@@ -372,7 +355,7 @@ contract Amm is IAmm, BlockContext {
      * @dev only owner can call this function
      * @param _open open to trade is true, otherwise is false.
      */
-    function setOpen(bool _open) external onlyOwner {
+    function setOpen(bool _open) external  {
         if (open == _open) return;
 
         open = _open;
@@ -386,7 +369,7 @@ contract Amm is IAmm, BlockContext {
      * @dev only owner can call
      * @param _tollRatio new toll ratio in 18 digits
      */
-    function setTollRatio(Decimal.decimal memory _tollRatio) public onlyOwner {
+    function setTollRatio(Decimal.decimal memory _tollRatio) public  {
         tollRatio = _tollRatio;
     }
 
@@ -395,7 +378,7 @@ contract Amm is IAmm, BlockContext {
      * @dev only owner can call
      * @param _spreadRatio new toll spread in 18 digits
      */
-    function setSpreadRatio(Decimal.decimal memory _spreadRatio) public onlyOwner {
+    function setSpreadRatio(Decimal.decimal memory _spreadRatio) public  {
         spreadRatio = _spreadRatio;
     }
 
@@ -407,7 +390,7 @@ contract Amm is IAmm, BlockContext {
      */
     function setCap(Decimal.decimal memory _maxHoldingBaseAsset, Decimal.decimal memory _openInterestNotionalCap)
         public
-        onlyOwner
+        
     {
         maxHoldingBaseAsset = _maxHoldingBaseAsset;
         openInterestNotionalCap = _openInterestNotionalCap;
@@ -419,7 +402,7 @@ contract Amm is IAmm, BlockContext {
      * @dev only owner can call
      * @param _priceFeed new price feed for this AMM
      */
-    function setPriceFeed(IPriceFeed _priceFeed) public onlyOwner {
+    function setPriceFeed(IPriceFeed _priceFeed) public  {
         require(address(_priceFeed) != address(0), "invalid PriceFeed address");
         priceFeed = _priceFeed;
         emit PriceFeedUpdated(address(priceFeed));

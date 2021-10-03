@@ -4,11 +4,10 @@ pragma experimental ABIEncoderV2;
 
 import { AggregatorV3Interface } from "@chainlink/contracts/src/v0.6/interfaces/AggregatorV3Interface.sol";
 import { BlockContext } from "./utils/BlockContext.sol";
-
 import { RootBridge } from "./bridge/ethereum/RootBridge.sol";
 import { Decimal, SafeMath } from "./utils/Decimal.sol";
 
-contract ChainlinkL1 is PerpFiOwnableUpgrade, BlockContext {
+contract ChainlinkL1 is BlockContext {
     using SafeMath for uint256;
     using Decimal for Decimal.decimal;
 
@@ -42,25 +41,24 @@ contract ChainlinkL1 is PerpFiOwnableUpgrade, BlockContext {
     //
     // FUNCTIONS
     //
-    function initialize(address _rootBridge, address _priceFeedL2) public initializer {
-        __Ownable_init();
+    function initialize(address _rootBridge, address _priceFeedL2) public {
         setRootBridge(_rootBridge);
         setPriceFeedL2(_priceFeedL2);
     }
 
-    function setRootBridge(address _rootBridge) public onlyOwner {
+    function setRootBridge(address _rootBridge) public {
         requireNonEmptyAddress(_rootBridge);
         rootBridge = RootBridge(_rootBridge);
         emit RootBridgeChanged(_rootBridge);
     }
 
-    function setPriceFeedL2(address _priceFeedL2) public onlyOwner {
+    function setPriceFeedL2(address _priceFeedL2) public {
         requireNonEmptyAddress(_priceFeedL2);
         priceFeedL2Address = _priceFeedL2;
         emit PriceFeedL2Changed(_priceFeedL2);
     }
 
-    function addAggregator(bytes32 _priceFeedKey, address _aggregator) external onlyOwner {
+    function addAggregator(bytes32 _priceFeedKey, address _aggregator) external {
         requireNonEmptyAddress(_aggregator);
         if (address(priceFeedMap[_priceFeedKey]) == address(0)) {
             priceFeedKeys.push(_priceFeedKey);
@@ -68,7 +66,7 @@ contract ChainlinkL1 is PerpFiOwnableUpgrade, BlockContext {
         priceFeedMap[_priceFeedKey] = AggregatorV3Interface(_aggregator);
     }
 
-    function removeAggregator(bytes32 _priceFeedKey) external onlyOwner {
+    function removeAggregator(bytes32 _priceFeedKey) external {
         requireNonEmptyAddress(address(getAggregator(_priceFeedKey)));
         delete priceFeedMap[_priceFeedKey];
 

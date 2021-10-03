@@ -37,7 +37,6 @@ interface IAmm {
         Decimal.decimal calldata _quoteAssetAmountLimit
     ) external returns (Decimal.decimal memory);
 
-    function shutdown() external;
 
     function settleFunding() external returns (SignedDecimal.signedDecimal memory);
 

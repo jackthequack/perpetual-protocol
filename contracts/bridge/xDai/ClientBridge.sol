@@ -34,7 +34,7 @@ contract ClientBridge is BaseBridge, BaseRelayRecipient {
         IAMB _ambBridge,
         IMultiTokenMediator _multiTokenMediator,
         address _trustedForwarder
-    ) public initializer {
+    ) public {
         __BaseBridge_init(_ambBridge, _multiTokenMediator);
 
         trustedForwarder = _trustedForwarder;
@@ -44,7 +44,7 @@ contract ClientBridge is BaseBridge, BaseRelayRecipient {
     /**
      * @notice set minimum withdrawal amount for different tokens
      */
-    function setMinWithdrawalAmount(IERC20 _token, Decimal.decimal memory _amount) external onlyOwner {
+    function setMinWithdrawalAmount(IERC20 _token, Decimal.decimal memory _amount) external {
         minWithdrawalAmountMap[_token] = _amount;
     }
 
@@ -63,11 +63,11 @@ contract ClientBridge is BaseBridge, BaseRelayRecipient {
     //
     // INTERNAL VIEW FUNCTIONS
     //
-    function _msgSender() internal view override(BaseRelayRecipient, Context) returns (address payable) {
+    function _msgSender() internal view override(BaseRelayRecipient) returns (address payable) {
         return super._msgSender();
     }
 
-    function _msgData() internal view override(BaseRelayRecipient, Context) returns (bytes memory ret) {
+    function _msgData() internal view override(BaseRelayRecipient) returns (bytes memory ret) {
         return super._msgData();
     }
 }

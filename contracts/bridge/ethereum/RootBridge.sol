@@ -28,7 +28,7 @@ contract RootBridge is BaseBridge {
     //
     // PUBLIC
     //
-    function initialize(IAMB _ambBridge, IMultiTokenMediator _multiTokenMediator) public initializer {
+    function initialize(IAMB _ambBridge, IMultiTokenMediator _multiTokenMediator) public {
         __BaseBridge_init(_ambBridge, _multiTokenMediator);
     }
 
@@ -39,7 +39,7 @@ contract RootBridge is BaseBridge {
         uint256 _timestamp,
         uint256 _roundId
     ) external returns (bytes32 messageId) {
-        require(address(priceFeed) == _msgSender(), "!priceFeed");
+        require(address(priceFeed) == msg.sender, "!priceFeed");
 
         bytes4 methodSelector = IPriceFeed.setLatestData.selector;
         bytes memory data =
@@ -47,7 +47,7 @@ contract RootBridge is BaseBridge {
         return callBridge(_priceFeedAddrOnL2, data, DEFAULT_GAS_LIMIT);
     }
 
-    function setPriceFeed(address _priceFeed) external onlyOwner {
+    function setPriceFeed(address _priceFeed) external {
         priceFeed = IPriceFeed(_priceFeed);
     }
 

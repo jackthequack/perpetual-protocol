@@ -5,7 +5,6 @@ pragma experimental ABIEncoderV2;
 import { AggregatorV3Interface } from "@chainlink/contracts/src/v0.6/interfaces/AggregatorV3Interface.sol";
 import { IPriceFeed } from "./interface/IPriceFeed.sol";
 import { BlockContext } from "./utils/BlockContext.sol";
-
 import { Decimal, SafeMath } from "./utils/Decimal.sol";
 
 contract ChainlinkPriceFeed is IPriceFeed, BlockContext {
@@ -33,11 +32,8 @@ contract ChainlinkPriceFeed is IPriceFeed, BlockContext {
     //
     // FUNCTIONS
     //
-    function initialize() public initializer {
-        __Ownable_init();
-    }
 
-    function addAggregator(bytes32 _priceFeedKey, address _aggregator) external onlyOwner {
+    function addAggregator(bytes32 _priceFeedKey, address _aggregator) external {
         requireNonEmptyAddress(_aggregator);
         if (address(priceFeedMap[_priceFeedKey]) == address(0)) {
             priceFeedKeys.push(_priceFeedKey);
@@ -46,7 +42,7 @@ contract ChainlinkPriceFeed is IPriceFeed, BlockContext {
         priceFeedDecimalMap[_priceFeedKey] = AggregatorV3Interface(_aggregator).decimals();
     }
 
-    function removeAggregator(bytes32 _priceFeedKey) external onlyOwner {
+    function removeAggregator(bytes32 _priceFeedKey) external {
         requireNonEmptyAddress(address(getAggregator(_priceFeedKey)));
         delete priceFeedMap[_priceFeedKey];
         delete priceFeedDecimalMap[_priceFeedKey];
