@@ -136,8 +136,8 @@ contract Amm is IAmm, BlockContext {
         uint256 _baseAssetReserve,
         uint256 _tradeLimitRatio,
         uint256 _fundingPeriod,
-        IPriceFeed _priceFeed,
-        bytes32 _priceFeedKey,
+        // IPriceFeed _priceFeed,
+        // bytes32 _priceFeedKey,
         address _quoteAsset,
         uint256 _fluctuationLimitRatio,
         uint256 _tollRatio,
@@ -148,7 +148,7 @@ contract Amm is IAmm, BlockContext {
                 _tradeLimitRatio != 0 &&
                 _baseAssetReserve != 0 &&
                 _fundingPeriod != 0 &&
-                address(_priceFeed) != address(0) &&
+                // address(_priceFeed) != address(0) &&
                 _quoteAsset != address(0),
             "invalid input"
         );
@@ -163,9 +163,9 @@ contract Amm is IAmm, BlockContext {
         fundingPeriod = _fundingPeriod;
         fundingBufferPeriod = _fundingPeriod.div(2);
         spotPriceTwapInterval = 1 hours;
-        priceFeedKey = _priceFeedKey;
+        // priceFeedKey = _priceFeedKey;
         quoteAsset = IERC20(_quoteAsset);
-        priceFeed = _priceFeed;
+        // priceFeed = _priceFeed;
         cumulativePositionMultiplier = Decimal.one();
         liquidityChangedSnapshots.push(
             LiquidityChangedSnapshot({
@@ -402,11 +402,11 @@ contract Amm is IAmm, BlockContext {
      * @dev only owner can call
      * @param _priceFeed new price feed for this AMM
      */
-    function setPriceFeed(IPriceFeed _priceFeed) public  {
-        require(address(_priceFeed) != address(0), "invalid PriceFeed address");
-        priceFeed = _priceFeed;
-        emit PriceFeedUpdated(address(priceFeed));
-    }
+    // function setPriceFeed(IPriceFeed _priceFeed) public  {
+    //     require(address(_priceFeed) != address(0), "invalid PriceFeed address");
+    //     priceFeed = _priceFeed;
+    //     emit PriceFeedUpdated(address(priceFeed));
+    // }
 
     //
     // VIEW FUNCTIONS
