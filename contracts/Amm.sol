@@ -398,9 +398,8 @@ contract Amm is IAmm, BlockContext {
     }
 
     /**
-     * @notice set priceFee address
      * @dev only owner can call
-     * @param _priceFeed new price feed for this AMM
+    
      */
     // function setPriceFeed(IPriceFeed _priceFeed) public  {
     //     require(address(_priceFeed) != address(0), "invalid PriceFeed address");
