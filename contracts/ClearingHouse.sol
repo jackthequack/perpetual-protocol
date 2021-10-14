@@ -178,7 +178,7 @@ contract ClearingHouse is
     mapping(address => Decimal.decimal) internal prepaidBadDebt;
 
     // contract dependencies
-    IInsuranceFund public insuranceFund;
+    // IInsuranceFund public insuranceFund;
     IMultiTokenRewardRecipient public feePool;
 
     // designed for arbitragers who can hold unlimited positions. will be removed after guarded period
@@ -203,17 +203,17 @@ contract ClearingHouse is
         uint256 _initMarginRatio,
         uint256 _maintenanceMarginRatio,
         uint256 _liquidationFeeRatio,
-        IInsuranceFund _insuranceFund,
+        // IInsuranceFund _insuranceFund,
         address _trustedForwarder
     ) public  {
-        require(address(_insuranceFund) != address(0), "Invalid IInsuranceFund");
+        // require(address(_insuranceFund) != address(0), "Invalid IInsuranceFund");
 
 
         versionRecipient = "1.0.0"; // we are not using it atm
         initMarginRatio = Decimal.decimal(_initMarginRatio);
         maintenanceMarginRatio = Decimal.decimal(_maintenanceMarginRatio);
         liquidationFeeRatio = Decimal.decimal(_liquidationFeeRatio);
-        insuranceFund = _insuranceFund;
+        // insuranceFund = _insuranceFund;
         trustedForwarder = _trustedForwarder;
     }
 
@@ -274,7 +274,7 @@ contract ClearingHouse is
      */
     function addMargin(IAmm _amm, Decimal.decimal calldata _addedMargin) external {
         // check condition
-        requireAmm(_amm, true);
+        // requireAmm(_amm, true);
         requireNonZeroInput(_addedMargin);
         // update margin part in personal position
         address trader = _msgSender();
@@ -293,7 +293,7 @@ contract ClearingHouse is
      */
     function removeMargin(IAmm _amm, Decimal.decimal calldata _removedMargin) external {
         // check condition
-        requireAmm(_amm, true);
+        // requireAmm(_amm, true);
         requireNonZeroInput(_removedMargin);
         // update margin part in personal position
         address trader = _msgSender();
@@ -323,7 +323,7 @@ contract ClearingHouse is
      */
     function settlePosition(IAmm _amm) external nonReentrant() {
         // check condition
-        requireAmm(_amm, false);
+        // requireAmm(_amm, false);
         address trader = _msgSender();
         Position memory pos = getPosition(_amm, trader);
         requirePositionSize(pos.size);
@@ -425,7 +425,7 @@ contract ClearingHouse is
         Decimal.decimal memory _leverage,
         Decimal.decimal memory _baseAssetAmountLimit
     ) public  {
-        requireAmm(_amm, true);
+        // requireAmm(_amm, true);
         requireNonZeroInput(_quoteAssetAmount);
         requireNonZeroInput(_leverage);
         requireMoreMarginRatio(MixedDecimal.fromDecimal(Decimal.one()).divD(_leverage), initMarginRatio, true);
@@ -528,7 +528,7 @@ contract ClearingHouse is
         public
     {
         // check conditions
-        requireAmm(_amm, true);
+        // requireAmm(_amm, true);
         requireNotRestrictionMode(_amm);
 
         // update position
@@ -605,7 +605,7 @@ contract ClearingHouse is
      * @param _trader trader address
      */
     function liquidate(IAmm _amm, address _trader) external nonReentrant() {
-        requireAmm(_amm, true);
+        // requireAmm(_amm, true);
         SignedDecimal.signedDecimal memory marginRatio = getMarginRatio(_amm, _trader);
 
         // including oracle-based margin ratio as reference price when amm is over spread limit
@@ -625,7 +625,7 @@ contract ClearingHouse is
         {
             Decimal.decimal memory liquidationBadDebt;
             Decimal.decimal memory feeToLiquidator;
-            Decimal.decimal memory feeToInsuranceFund;
+            // Decimal.decimal memory feeToInsuranceFund;
             IERC20 quoteAsset = _amm.quoteAsset();
 
             if (
@@ -653,7 +653,7 @@ contract ClearingHouse is
                 // half of the liquidationFee goes to liquidator & another half goes to insurance fund
                 liquidationPenalty = positionResp.exchangedQuoteAssetAmount.mulD(liquidationFeeRatio);
                 feeToLiquidator = liquidationPenalty.divScalar(2);
-                feeToInsuranceFund = liquidationPenalty.subD(feeToLiquidator);
+                // feeToInsuranceFund = liquidationPenalty.subD(feeToLiquidator);
 
                 positionResp.position.margin = positionResp.position.margin.subD(liquidationPenalty);
                 setPosition(_amm, _trader, positionResp.position);
@@ -677,14 +677,14 @@ contract ClearingHouse is
                 if (totalBadDebt.toUint() > 0) {
                     realizeBadDebt(quoteAsset, totalBadDebt);
                 }
-                if (remainMargin.toUint() > 0) {
-                    feeToInsuranceFund = remainMargin;
-                }
+                // if (remainMargin.toUint() > 0) {
+                //     feeToInsuranceFund = remainMargin;
+                // }
             }
 
-            if (feeToInsuranceFund.toUint() > 0) {
-                transferToInsuranceFund(quoteAsset, feeToInsuranceFund);
-            }
+            // if (feeToInsuranceFund.toUint() > 0) {
+            //     transferToInsuranceFund(quoteAsset, feeToInsuranceFund);
+            // }
             withdraw(quoteAsset, _msgSender(), feeToLiquidator);
             enterRestrictionMode(_amm);
 
@@ -724,7 +724,7 @@ contract ClearingHouse is
      * @param _amm IAmm address
      */
     function payFunding(IAmm _amm) external {
-        requireAmm(_amm, true);
+        // requireAmm(_amm, true);
 
         SignedDecimal.signedDecimal memory premiumFraction = _amm.settleFunding();
         ammMap[address(_amm)].cumulativePremiumFractions.push(
@@ -740,11 +740,11 @@ contract ClearingHouse is
         SignedDecimal.signedDecimal memory ammFundingPaymentProfit = premiumFraction.mulD(totalTraderPositionSize);
 
         IERC20 quoteAsset = _amm.quoteAsset();
-        if (ammFundingPaymentProfit.toInt() < 0) {
-            insuranceFund.withdraw(quoteAsset, ammFundingPaymentProfit.abs());
-        } else {
-            transferToInsuranceFund(quoteAsset, ammFundingPaymentProfit.abs());
-        }
+        // if (ammFundingPaymentProfit.toInt() < 0) {
+        //     insuranceFund.withdraw(quoteAsset, ammFundingPaymentProfit.abs());
+        // } else {
+        //     transferToInsuranceFund(quoteAsset, ammFundingPaymentProfit.abs());
+        // }
     }
 
     /**
@@ -1145,9 +1145,9 @@ contract ClearingHouse is
             IERC20 quoteAsset = _amm.quoteAsset();
 
             // transfer spread to insurance fund
-            if (hasSpread) {
-                _transferFrom(quoteAsset, _from, address(insuranceFund), spread);
-            }
+            // if (hasSpread) {
+            //     _transferFrom(quoteAsset, _from, address(insuranceFund), spread);
+            // }
 
             // transfer toll to feePool
             if (hasToll) {
@@ -1174,7 +1174,7 @@ contract ClearingHouse is
         if (totalTokenBalance.toUint() < _amount.toUint()) {
             Decimal.decimal memory balanceShortage = _amount.subD(totalTokenBalance);
             prepaidBadDebt[address(_token)] = prepaidBadDebt[address(_token)].addD(balanceShortage);
-            insuranceFund.withdraw(_token, balanceShortage);
+            // insuranceFund.withdraw(_token, balanceShortage);
         }
 
         _transfer(_token, _receiver, _amount);
@@ -1187,19 +1187,19 @@ contract ClearingHouse is
             prepaidBadDebt[address(_token)] = badDebtBalance.subD(_badDebt);
         } else {
             // in order to realize all the bad debt vault need extra tokens from insuranceFund
-            insuranceFund.withdraw(_token, _badDebt.subD(badDebtBalance));
+            // insuranceFund.withdraw(_token, _badDebt.subD(badDebtBalance));
             prepaidBadDebt[address(_token)] = Decimal.zero();
         }
     }
 
-    function transferToInsuranceFund(IERC20 _token, Decimal.decimal memory _amount) internal {
-        Decimal.decimal memory totalTokenBalance = _balanceOf(_token, address(this));
-        _transfer(
-            _token,
-            address(insuranceFund),
-            totalTokenBalance.toUint() < _amount.toUint() ? totalTokenBalance : _amount
-        );
-    }
+    // function transferToInsuranceFund(IERC20 _token, Decimal.decimal memory _amount) internal {
+    //     Decimal.decimal memory totalTokenBalance = _balanceOf(_token, address(this));
+    //     _transfer(
+    //         _token,
+    //         address(insuranceFund),
+    //         totalTokenBalance.toUint() < _amount.toUint() ? totalTokenBalance : _amount
+    //     );
+    // }
 
     /**
      * @dev assume this will be removes soon once the guarded period has ended. caller need to ensure amm exist
@@ -1346,10 +1346,10 @@ contract ClearingHouse is
     //
     // REQUIRE FUNCTIONS
     //
-    function requireAmm(IAmm _amm, bool _open) private view {
-        require(insuranceFund.isExistedAmm(_amm), "amm not found");
-        require(_open == _amm.open(), _open ? "amm was closed" : "amm is open");
-    }
+    // function requireAmm(IAmm _amm, bool _open) private view {
+    //     require(insuranceFund.isExistedAmm(_amm), "amm not found");
+    //     require(_open == _amm.open(), _open ? "amm was closed" : "amm is open");
+    // }
 
     function requireNonZeroInput(Decimal.decimal memory _decimal) private pure {
         require(_decimal.toUint() != 0, "input is 0");
