@@ -1,0 +1,40 @@
+ClearingHouse.sol
+
+    Appears to be contract for handling entry and exit plus payouts for the ecosystem
+
+    Need to figure out what function to call to increase my deposit into the ecosystem. 
+        Have openPosition, but it's not a payable function so don't think it's starting point.  Maybe second step.
+        Before completely dogfooding, check on the function adjustPositionForLiquidityChanged, which openPosition calls.
+	LOOK AT THEIR TESTS!!
+
+
+    To open position in clearing house:
+            clearingHouse.openPosition(amm.address, Side.Buy, toDecimal(600), toDecimal(1), toDecimal(0), {
+                from: alice
+            })
+
+    When using brownie console, in order to interact with deployed contract, you must do var[0] (i.e Amm[0], where Amm is the variable that stores the result of deployer.deploy(Amm))
+
+AMM.sol
+    Quote asset is the depositing asset (i.e USDC)
+    Base asset is the fluctuating asset (i.e BTC or ETH)
+
+
+General brownie:
+    To get WETH to a user: Find wallet on ETH with WETH, do USER=Contract.from_explorer(address), WETH=Contract.from_explorer("0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2"), WETH.transferFrom...
+
+
+
+
+
+
+
+
+
+
+
+
+
+11/10 Notes:
+    Struggling.  Thinking about recopying original Perp repo and working from there.  It's currently hard to narrow down where issues are arising because of the combination of not knowing much about the repo and having deleted a bunch of files.  Just try to mimick their JS tests in Python first to get a feel.  Baby steps
+    

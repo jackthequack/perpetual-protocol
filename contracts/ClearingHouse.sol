@@ -14,11 +14,9 @@ import { Context } from "@openzeppelin/contracts-ethereum-package/contracts/GSN/
 // solhint-disable-next-line
 import { ReentrancyGuard } from "@openzeppelin/contracts-ethereum-package/contracts/utils/ReentrancyGuard.sol";
 import { IAmm } from "./interface/IAmm.sol";
-import { IInsuranceFund } from "./interface/IInsuranceFund.sol";
 import { IMultiTokenRewardRecipient } from "./interface/IMultiTokenRewardRecipient.sol";
 
-// note BaseRelayRecipient must come after OwnerPausableUpgradeSafe so its _msgSender() takes precedence
-// (yes, the ordering is reversed comparing to Python)
+
 contract ClearingHouse is
     DecimalERC20,
     ReentrancyGuard,
