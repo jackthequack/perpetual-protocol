@@ -1,0 +1,62 @@
+Remember to set Infura ID and run nvm install node@8.12.0
+
+ClearingHouse.sol
+
+    Appears to be contract for handling entry and exit plus payouts for the ecosystem
+
+    Need to figure out what function to call to increase my deposit into the ecosystem. 
+        Have openPosition, but it's not a payable function so don't think it's starting point.  Maybe second step.
+        Before completely dogfooding, check on the function adjustPositionForLiquidityChanged, which openPosition calls.
+	LOOK AT THEIR TESTS!!
+
+
+    To open position in clearing house:
+            clearingHouse.openPosition(amm.address, Side.Buy, toDecimal(600), toDecimal(1), toDecimal(0), {
+                from: alice
+            })
+
+    When using brownie console, in order to interact with deployed contract, you must do var[0] (i.e Amm[0], where Amm is the variable that stores the result of deployer.deploy(Amm))
+
+AMM.sol
+    Quote asset is the depositing asset (i.e USDC)
+    Base asset is the fluctuating asset (i.e BTC or ETH)
+
+
+General brownie:
+    To get WETH to a user: Find wallet on ETH with WETH, do USER=Contract.from_explorer(address), WETH=Contract.from_explorer("0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2"), WETH.transferFrom...
+
+
+
+
+
+
+
+
+
+
+
+
+
+11/10 Notes:
+    Struggling.  Thinking about recopying original Perp repo and working from there.  It's currently hard to narrow down where issues are arising because of the combination of not knowing much about the repo and having deleted a bunch of files.  Just try to mimick their JS tests in Python first to get a feel.  Baby steps
+    
+11/11 Notes:
+    Lot's of tedious work so far.  Deleted all previous work (stored on Quack branch) and used clean perpetual repository.  Began by just trying to get the contracts to compile.  The guys at Perp are a bunch of hardos who edited the Openzeppelin upgradeable contracts for some functionality (not sure what didn't look).  Is this common practice?  Next steps are to play around with brownie console to manually deploy clearinghouse, AMM, probs Insurance, and I'll figure out whatever else I need.  Remember that perp has docs on these functions in their github.  Might be good to take notes on those.
+
+11/12 Notes:
+    This project needs lots of leg work.  Will be a test of patience.  I think the end result of having a robust understanding of implementing vAMMs on chain will be valuable as derivatives are starting to pick up in the on-chain crypto realm.
+    Figured out how to use the ChainlinkPriceFeed contract in the perp repo.  Steps: instantiate a chainlink agg from etherscan, and pass in the hex encoded price key (i.e 'ETH' -> 0x455448), and the address of the aggregator.
+    Now I want to be able to deploy clearinghouse (will probs need insurance fund and maybe some other things to do this), Amm, and start trying to get the basics of interacting with the different components of them.
+    I will soon begin writing deployment scripts and hopefully soon after write tests.
+    What purpose do the chainlink contracts serve?
+
+11/13 Notes:
+    On to creating the deployment scripts.  Only tricky issue I've had today has been with initializing the Amm contract.  Kind of hard to determine what is going wrong (pretty sure inputs are correct but idk) since there are no error messages.  I know the gas limit was all used up, but that could be because of something brownie does on revert.
+    In the clearinghouse contract, it calls _amm.swapInput or _amm.swapOutput to Open/close/update positions.  Kind of interesting, seems like clearing house and AMM don't need to be linked by function call.  I wonder what would happen if you called one of these functions on some arbitrary Amm.  I presume they either don't have these functions or they don't have the setOpen variable.
+
+11/14 Notes:
+    Not a ton of work done today.  Had some fun learning a bit about Solana and Rust as well.  Need to unlock the blacklister of USDC contract to unblacklist maker.  Alternatively, I can unlock a tokenholders account in the same way I did Vitalik's.  Slow and steady.  These steps build upon each other and things will progressively get smoother and testing will be more seamless.  Left off Rust book at what is ownership.
+
+11/17 Notes:
+    Might just do Rust again.  A bit exhausted to debug today.
+

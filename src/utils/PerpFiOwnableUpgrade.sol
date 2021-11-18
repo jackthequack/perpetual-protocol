@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 pragma solidity 0.6.9;
 
-import { ContextUpgradeSafe } from "@openzeppelin/contracts-ethereum-package/contracts/GSN/Context.sol";
+import { ContextUpgradeable } from "@openzeppelin/contracts-ethereum-package-upgradeable/contracts/utils/ContextUpgradeable.sol";
 
 // copy from openzeppelin Ownable, only modify how the owner transfer
 /**
@@ -16,7 +16,7 @@ import { ContextUpgradeSafe } from "@openzeppelin/contracts-ethereum-package/con
  * `onlyOwner`, which can be applied to your functions to restrict their use to
  * the owner.
  */
-contract PerpFiOwnableUpgrade is ContextUpgradeSafe {
+contract PerpFiOwnableUpgrade is ContextUpgradeable {
     address private _owner;
     address private _candidate;
 

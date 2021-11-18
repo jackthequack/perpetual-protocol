@@ -3,7 +3,7 @@ pragma solidity 0.6.9;
 pragma experimental ABIEncoderV2;
 
 import { BaseBridge, IAMB, IMultiTokenMediator, Decimal, IERC20 } from "../BaseBridge.sol";
-import { IPriceFeed } from "../../interface/IPriceFeed.sol";
+import { IPriceFeed } from "../../interfaces/IPriceFeed.sol";
 
 contract RootBridge is BaseBridge {
     using Decimal for Decimal.decimal;
